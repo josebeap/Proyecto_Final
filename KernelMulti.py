@@ -258,10 +258,14 @@ def main():
     print("imagenes/"+str(nombres_imagenes))
     
     # Lista de rutas de imágenes y filtros a aplicar
-
+    #lista_imagenes = []
+    imagenes_y_filtros = []
     for i in nombres_imagenes:
        print("imagenes/"+str(i))
-       imagenes_y_filtros = [("imagenes/"+str(i), "filtrojph")]
+       imagenes_y_filtros.append(("imagenes/"+str(i), "filtrojph"))
+       #lista_imagenes.append(imagenes_y_filtros)
+       
+    print("La lista de tuplas:", imagenes_y_filtros)
 
 
     # Crear un pool de procesos

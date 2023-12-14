@@ -81,7 +81,7 @@ def main():
         # Guardar la imagen procesada
         for idx, resultado in enumerate(resultados):
             imagen_procesada = Image.fromarray(resultado)
-            path_resultado = f'imagen_con_bordes_{idx}.jpg'
+            path_resultado = f'imagen_procesada_{idx}.jpg'
             guardar_imagen(imagen_procesada, path_resultado)
             
     
