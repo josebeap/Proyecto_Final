@@ -1,5 +1,4 @@
 import multiprocessing
-import cv2
 import numpy as np
 import os
 from PIL import Image
@@ -247,7 +246,8 @@ def main():
     # Obtener la ruta actual del script
     script_dir = os.path.dirname(os.path.realpath(__file__))
     # Lista de rutas de imágenes y filtros a aplicar
-    imagenes_y_filtros = [("descargas/cb-300f.jpg", "filtrojph")]
+    
+    imagenes_y_filtros = [("imagenes/cb-300f.jpg", "filtrojph")]
 
     # Crear un pool de procesos
     pool = multiprocessing.Pool()
