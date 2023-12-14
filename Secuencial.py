@@ -1,19 +1,11 @@
-from mpi4py import MPI
+import multiprocessing
 import numpy as np
-from PIL import Image
 import os
+from PIL import Image
+import time
+from IPython.display import display
 import time
 
-
-# Inicializar MPI
-comm = MPI.COMM_WORLD
-
-
-rank = comm.Get_rank()
-size = comm.Get_size()
-
-
-# Definir kernels
 kernels = {
     'kernela' : np.array([[0, 1, 0], 
                         [0, -1, 0], 
@@ -72,50 +64,13 @@ kernels = {
                         [1, 1, 1]], np.int8)
 }
 
-
-# Función para cargar una imagen desde una ruta
 def cargar_imagen(ruta):
     return Image.open(ruta).convert('L')
 
-# Función para guardar una imagen en una ruta específica
 def guardar_imagen(imagen, ruta):
     imagen.save(ruta)
 
-# Función para aplicar un filtro y calcular estadísticas a una porción de la imagen
-def aplicar_filtro_y_estadisticas(imagen, filtro, rank, size):
-    pixels = np.array(imagen)
-
-    # Comunicar el kernel a todos los procesos
-    kernel = None
-    if rank == 0:
-        kernel = kernels[filtro]
-    kernel = comm.bcast(kernel, root=0)
-
-    # Calcular la porción de la imagen que debe procesar este proceso
-    rows_per_process = pixels.shape[0] // size
-    start_row = rank * rows_per_process
-    end_row = (rank + 1) * rows_per_process if rank != size - 1 else pixels.shape[0]
-
-    resultado = np.zeros_like(pixels[start_row:end_row])
-
-    # Aplicar el filtro a la porción de la imagen asignada a este proceso
-    kernel_size = kernel.shape[0]
-    half_kernel_size = kernel_size // 2
-
-    for i in range(start_row + half_kernel_size, end_row - half_kernel_size):
-        for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
-            gy = np.sum(np.multiply(pixels[i - half_kernel_size:i + half_kernel_size + 1, j - half_kernel_size:j + half_kernel_size + 1], kernel))
-            resultado[i - start_row, j] = min(255, np.abs(gy))
-
-    return resultado
-
-# Función para procesar una imagen con un filtro específico
-def procesar_imagen(args, rank, size):
-    ruta_imagen, filtro = args
-    imagen = cargar_imagen(ruta_imagen)
-    return aplicar_filtro_y_estadisticas(imagen, filtro, rank, size)
-
-def aplicar_filtro_y_estadisticasDos(imagen, filtro, nombre):
+def aplicar_filtro_y_estadisticas(imagen, filtro, nombre):
 
     # Convertir imagen a un array de numpy
     pixels = np.array(imagen)
@@ -267,7 +222,7 @@ def aplicar_filtro_y_estadisticasDos(imagen, filtro, nombre):
      # Guardar la imagen procesada
  
     imagen_procesada = Image.fromarray(resultado)
-    path_resultado = str(nombre)+' imagen_procesada.jpg'
+    path_resultado = str(nombre)+' imagen_con_bordes.jpg'
    
 
     guardar_imagen(imagen_procesada, path_resultado)
@@ -281,46 +236,67 @@ def aplicar_filtro_y_estadisticasDos(imagen, filtro, nombre):
 
     return dimensiones, valor_minimo, valor_maximo, valor_medio, desviacion_estandar
 
-# Función principal
-def main():
+def procesar_imagen(args):
+    ruta_imagen, filtro = args
+    imagen = cargar_imagen(ruta_imagen)
+    nombre = str(ruta_imagen)
+    print(nombre)
+    # Generar un nombre de archivo de salida
+    #nombre_archivo_salida = f"{ruta_imagen.split('.')[0]}_{filtro}.jpg"
     
-    imagenes_y_filtros = [("imagenes/apple_pear.jpg", "kernelb")]
+    return aplicar_filtro_y_estadisticas(imagen, filtro, nombre)
 
-    resultados = []
+def main():
+    # Obtener la ruta actual del script
+    # Obtenemos la lista de nombres de archivos en la carpeta
+    imagenes = os.listdir("./imagenes")
+    nombres_imagenes = []
+    # Recorremos la lista de archivos
+    for imagen in imagenes:
+        # Leemos la imagen
+        nombres_imagenes.append(imagen)
+
+    print("imagenes/"+str(nombres_imagenes))
+    
+    # Lista de rutas de imágenes y filtros a aplicar
+    #lista_imagenes = []
+    imagenes_y_filtros = []
+    for i in nombres_imagenes:
+       print("imagenes/"+str(i))
+       imagenes_y_filtros.append(("imagenes/"+str(i), "filtrojph"))
+       #lista_imagenes.append(imagenes_y_filtros)
+       
+    print("La lista de tuplas:", imagenes_y_filtros)
+
+
+    # Crear un pool de procesos
+    pool = multiprocessing.Pool(processes=4)
     
     start_timeUno = time.time()
-    # Procesar imágenes en paralelo
-    for args in imagenes_y_filtros:
-        resultado_parcial = procesar_imagen(args, rank, size)
-        resultados.append(resultado_parcial)
-
-    # Recopilar resultados en el proceso maestro
-    if rank == 0:
-        for i in range(1, size):
-            resultado_parcial = comm.recv(source=i)
-            resultados.extend(resultado_parcial)
-
-        # Guardar la imagen procesada
-        for idx, resultado in enumerate(resultados):
-            imagen_procesada = Image.fromarray(resultado)
-            path_resultado = f'imagen_procesada_{idx}.jpg'
-            guardar_imagen(imagen_procesada, path_resultado)
+    # Procesar las imágenes en paralelo
+    resultados = pool.map(procesar_imagen, imagenes_y_filtros)
     end_timeUno = time.time()
     tiempo_paralelo = end_timeUno - start_timeUno
-    print("Tiempo Multiprocessing", end_timeUno - start_timeUno)      
-    
+    print("Tiempo Multiprocessing", end_timeUno - start_timeUno)
     
     start_time = time.time()
     #Secuencial
     for i in imagenes_y_filtros:
         imagenUno = cargar_imagen(i[0])
+        filtro = i[1]
         nombre = str(i[0])
-        aplicar_filtro_y_estadisticasDos(imagenUno, "filtrob", nombre)
+        aplicar_filtro_y_estadisticas(imagenUno, filtro, nombre)
     end_time = time.time()
     tiempo_secuencial = end_time - start_time
     print("Tiempo secuencial", end_time - start_time)
     
-    print("Aceleración", tiempo_secuencial / tiempo_paralelo)
+    print("Aceleración", tiempo_secuencial - tiempo_paralelo)
+    
+    
+
+    # Mostrar resultados
+    for resultado in resultados:
+        print(resultado)
 
 if __name__ == "__main__":
     main()

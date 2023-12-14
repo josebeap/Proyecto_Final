@@ -85,7 +85,8 @@ def aplicar_filtro_y_estadisticas(imagen, filtro, nombre):
         for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
             for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
                 # Aplica el kernel
-                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernela']))
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, 
+                                               j-half_kernel_size:j+half_kernel_size+1], kernels['kernela']))
                 resultado[i, j] = min(255, np.abs(gy))
                 
     elif filtro == "filtrob":
@@ -221,7 +222,7 @@ def aplicar_filtro_y_estadisticas(imagen, filtro, nombre):
      # Guardar la imagen procesada
  
     imagen_procesada = Image.fromarray(resultado)
-    path_resultado = str(nombre)+' imagen_con_bordes.jpg'
+    path_resultado =str(nombre)+'imagen_procesada.jpg'
    
 
     guardar_imagen(imagen_procesada, path_resultado)
@@ -269,10 +270,29 @@ def main():
 
 
     # Crear un pool de procesos
-    pool = multiprocessing.Pool()
+    pool = multiprocessing.Pool(processes=4)
     
+    start_timeUno = time.time()
     # Procesar las imágenes en paralelo
     resultados = pool.map(procesar_imagen, imagenes_y_filtros)
+    end_timeUno = time.time()
+    tiempo_paralelo = end_timeUno - start_timeUno
+    print("Tiempo Multiprocessing", end_timeUno - start_timeUno)
+    
+    start_time = time.time()
+    #Secuencial
+    for i in imagenes_y_filtros:
+        imagenUno = cargar_imagen(i[0])
+        filtro = i[1]
+        nombre = str(i[0])
+        aplicar_filtro_y_estadisticas(imagenUno, filtro, nombre)
+    end_time = time.time()
+    tiempo_secuencial = end_time - start_time
+    print("Tiempo secuencial", end_time - start_time)
+    
+    print("Aceleración", tiempo_secuencial / tiempo_paralelo)
+    
+    
 
     # Mostrar resultados
     for resultado in resultados:
