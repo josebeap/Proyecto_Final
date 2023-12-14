@@ -69,7 +69,7 @@ def cargar_imagen(ruta):
 def guardar_imagen(imagen, ruta):
     imagen.save(ruta)
 
-def aplicar_filtro_y_estadisticas(imagen, filtro):
+def aplicar_filtro_y_estadisticas(imagen, filtro, nombre):
 
     # Convertir imagen a un array de numpy
     pixels = np.array(imagen)
@@ -219,9 +219,11 @@ def aplicar_filtro_y_estadisticas(imagen, filtro):
         raise ValueError("Filtro no reconocido")
     
      # Guardar la imagen procesada
-    #cv2.imwrite("Image_1_filtro1.jpg", imagen_procesada)
+ 
     imagen_procesada = Image.fromarray(resultado)
-    path_resultado = 'imagen_con_bordes.jpg'
+    path_resultado = str(nombre)+' imagen_con_bordes.jpg'
+   
+
     guardar_imagen(imagen_procesada, path_resultado)
     
     # Calcular estadísticas
@@ -236,18 +238,31 @@ def aplicar_filtro_y_estadisticas(imagen, filtro):
 def procesar_imagen(args):
     ruta_imagen, filtro = args
     imagen = cargar_imagen(ruta_imagen)
-    
+    nombre = str(ruta_imagen)
+    print(nombre)
     # Generar un nombre de archivo de salida
     #nombre_archivo_salida = f"{ruta_imagen.split('.')[0]}_{filtro}.jpg"
     
-    return aplicar_filtro_y_estadisticas(imagen, filtro)
+    return aplicar_filtro_y_estadisticas(imagen, filtro, nombre)
 
 def main():
     # Obtener la ruta actual del script
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    # Lista de rutas de imágenes y filtros a aplicar
+    # Obtenemos la lista de nombres de archivos en la carpeta
+    imagenes = os.listdir("./imagenes")
+    nombres_imagenes = []
+    # Recorremos la lista de archivos
+    for imagen in imagenes:
+        # Leemos la imagen
+        nombres_imagenes.append(imagen)
+
+    print("imagenes/"+str(nombres_imagenes))
     
-    imagenes_y_filtros = [("imagenes/cb-300f.jpg", "filtrojph")]
+    # Lista de rutas de imágenes y filtros a aplicar
+
+    for i in nombres_imagenes:
+       print("imagenes/"+str(i))
+       imagenes_y_filtros = [("imagenes/"+str(i), "filtrojph")]
+
 
     # Crear un pool de procesos
     pool = multiprocessing.Pool()
