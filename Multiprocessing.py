@@ -6,6 +6,64 @@ from PIL import Image
 import time
 from IPython.display import display
 
+kernels = {
+    'kernela' : np.array([[0, 1, 0], 
+                        [0, -1, 0], 
+                        [0, 0, 0]], np.int8),
+    
+    'kernelb' : np.array([[0, 0, 0, 0, 0], 
+                        [0, 0, 1, 0, 0], 
+                        [0, 0, -1, 0, 0], 
+                        [0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0]], np.int8),
+    
+    'kernelc' : np.array([[0, 0, -1, 0, 0], 
+                        [0, 0, 3, 0, 0], 
+                        [0, 0, -3, 0, 0], 
+                        [0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 0]], np.int8),
+    
+    'kerneld' : np.array([[-1, 2, -1], 
+                        [2, -4, 2], 
+                        [-1, 2, -1]], np.int8),
+    
+    'kernele' : np.array([[-1, 2, -1], 
+                        [2, -4, 2], 
+                        [0, 0, 0]], np.int8),
+    
+    'kernelf' : np.array([[-1, 2, -2, 2, -1], 
+                        [2, -6, 8, -6, 2], 
+                        [-2, 8, -12, 8, -2], 
+                        [2, -6, 8, -6, 2],
+                        [-1, 2, -2, 2, -1]], np.int8),
+    
+    'kernelg' : np.array([[-1, 2, -2, 2, -1], 
+                        [2, -6, 8, -6, 2], 
+                        [-2, 8, -12, 8, -2], 
+                        [0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0]], np.int8),
+    
+    'kernelh1sv' : np.array([[-1, 0, 1], 
+                        [-2, 0, 2], 
+                        [-1, 0, 1]], np.int8),
+    
+    'kernelh2sh' : np.array([[-1, -2, -1], 
+                        [0, 0, 0], 
+                        [1, 2, 1]], np.int8),
+    
+    'kerneli' : np.array([[-1, -1, -1], 
+                        [-1, 8, -1], 
+                        [-1, -1, -1]], np.int8),
+    
+    'kerneljpv' : np.array([[-1, 0, 1], 
+                        [-1, 0, 1], 
+                        [-1, 0, 1]], np.int8),
+    
+    'kerneljph' : np.array([[-1, -1, -1], 
+                        [0, 0, 0], 
+                        [1, 1, 1]], np.int8)
+}
+
 def cargar_imagen(ruta):
     return Image.open(ruta).convert('L')
 
@@ -13,10 +71,6 @@ def guardar_imagen(imagen, ruta):
     imagen.save(ruta)
 
 def aplicar_filtro_y_estadisticas(imagen, filtro):
-    # Definir dos kernels
-    kernel1 = np.array([[0, 1, 0], [0, -1, 0], [0, 0, 0]], np.int8) # Ejemplo de kernel para enfocar
-    
-    kernel3 = np.array([[0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, -1, 0, 0], [0, 0, 0, 0, 0],[0, 0, 0, 0, 0]], np.int8)
 
     # Convertir imagen a un array de numpy
     pixels = np.array(imagen)
@@ -24,24 +78,144 @@ def aplicar_filtro_y_estadisticas(imagen, filtro):
     # Preparar el array de salida
     resultado = np.zeros_like(pixels)
     # Aplicar el filtro seleccionado
-    if filtro == "filtro1":
+    if filtro == "filtroa":
        
-        # Aplicar el filtro de Sobel solo en la dirección vertical
-        for i in range(1, pixels.shape[0]-1):
-            for j in range(1, pixels.shape[1]-1):
-                gy = np.sum(np.multiply(pixels[i-1:i+2, j-1:j+2], kernel3))
-                resultado[i, j] = min(255, np.abs(gy))
-                
-    elif filtro == "filtro2":
-        # Calcula el tamaño del kernel
-        kernel_size = kernel1.shape[0]
+        kernel_size = kernels['kernela'].shape[0]
         half_kernel_size = kernel_size // 2
         
         for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
             for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
                 # Aplica el kernel
-                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernel1))
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernela']))
                 resultado[i, j] = min(255, np.abs(gy))
+                
+    elif filtro == "filtrob":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernelb'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernelb']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+    elif filtro == "filtroc":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernelc'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernelc']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+    elif filtro == "filtrod":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kerneld'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kerneld']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+    elif filtro == "filtroe":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernele'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernele']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+    elif filtro == "filtrof":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernelf'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernelf']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+                
+    elif filtro == "filtrog":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernelg'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernelg']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+                
+    elif filtro == "filtrohsv":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernelh1sv'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernelh1sv']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+                
+    elif filtro == "filtrohsh":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kernelh2sh'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernelh2sh']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+                
+    elif filtro == "filtroi":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kerneli'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kerneli']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+                
+    elif filtro == "filtrojpv":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kerneljpv'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kerneljpv']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
+                
+    elif filtro == "filtrojph":
+        # Calcula el tamaño del kernel
+        kernel_size = kernels['kerneljph'].shape[0]
+        half_kernel_size = kernel_size // 2
+        
+        for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
+            for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
+                # Aplica el kernel
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kerneljph']))
+                resultado[i, j] = min(255, np.abs(gy))
+                
     else:
         raise ValueError("Filtro no reconocido")
     
@@ -73,7 +247,7 @@ def main():
     # Obtener la ruta actual del script
     script_dir = os.path.dirname(os.path.realpath(__file__))
     # Lista de rutas de imágenes y filtros a aplicar
-    imagenes_y_filtros = [("downloads/cb-300f.jpg", "filtro2")]
+    imagenes_y_filtros = [("descargas/cb-300f.jpg", "filtrojph")]
 
     # Crear un pool de procesos
     pool = multiprocessing.Pool()
