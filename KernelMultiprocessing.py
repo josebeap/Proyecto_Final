@@ -4,7 +4,6 @@ import os
 from PIL import Image
 import time
 from IPython.display import display
-import time
 
 kernels = {
     'kernela' : np.array([[0, 1, 0], 
@@ -86,7 +85,8 @@ def aplicar_filtro_y_estadisticas(imagen, filtro, nombre):
         for i in range(half_kernel_size, pixels.shape[0] - half_kernel_size):
             for j in range(half_kernel_size, pixels.shape[1] - half_kernel_size):
                 # Aplica el kernel
-                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, j-half_kernel_size:j+half_kernel_size+1], kernels['kernela']))
+                gy = np.sum(np.multiply(pixels[i-half_kernel_size:i+half_kernel_size+1, 
+                                               j-half_kernel_size:j+half_kernel_size+1], kernels['kernela']))
                 resultado[i, j] = min(255, np.abs(gy))
                 
     elif filtro == "filtrob":
@@ -222,7 +222,7 @@ def aplicar_filtro_y_estadisticas(imagen, filtro, nombre):
      # Guardar la imagen procesada
  
     imagen_procesada = Image.fromarray(resultado)
-    path_resultado = str(nombre)+' imagen_con_bordes.jpg'
+    path_resultado =str(nombre)+'imagen_procesada.jpg'
    
 
     guardar_imagen(imagen_procesada, path_resultado)
@@ -263,7 +263,7 @@ def main():
     imagenes_y_filtros = []
     for i in nombres_imagenes:
        print("imagenes/"+str(i))
-       imagenes_y_filtros.append(("imagenes/"+str(i), "filtrojph"))
+       imagenes_y_filtros.append(("imagenes/"+str(i), "filtroi"))
        #lista_imagenes.append(imagenes_y_filtros)
        
     print("La lista de tuplas:", imagenes_y_filtros)
@@ -288,15 +288,16 @@ def main():
         aplicar_filtro_y_estadisticas(imagenUno, filtro, nombre)
     end_time = time.time()
     tiempo_secuencial = end_time - start_time
+    
     print("Tiempo secuencial", end_time - start_time)
     
-    print("Aceleración", tiempo_secuencial - tiempo_paralelo)
+    print("Aceleración", tiempo_secuencial / tiempo_paralelo)
     
     
 
     # Mostrar resultados
     for resultado in resultados:
-        print(resultado)
+        print(resultado)S
 
 if __name__ == "__main__":
     main()
